@@ -4,10 +4,20 @@
   "description": "Normalizes and denormalizes JSON according to JSON schema",
   "main": "lib/index.js",
   "scripts": {
+    "build": "webpack",
     "format": "prettier-standard ./src/**/*.js",
     "format:single": "prettier-standard",
+    "lint": "eslint ./src/",
+    "precommit": "lint-staged",
     "test": "tape \"tests/index.js\" -r babel-register | tap-spec",
     "test:watch": "tape-watch \"tests/index.js\" -r babel-register -o '| tap-spec'"
+  },
+  "lint-staged": {
+    "*.js": [
+      "format:single",
+      "eslint",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
@@ -36,11 +46,16 @@
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
     "debug": "^3.0.0",
+    "eslint": "^4.7.2",
+    "eslint-config-standard": "^10.2.1",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.2.3",
     "prettier-standard": "^6.0.0",
     "standard": "^10.0.3",
     "tap-spec": "^4.1.1",
     "tape": "^4.8.0",
     "tape-watch": "^2.3.0",
-    "webpack": "^3.5.5"
+    "webpack": "^3.6.0",
+    "webpack-bundle-analyzer": "^2.9.0"
   }
 }
