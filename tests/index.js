@@ -1,15 +1,16 @@
 import test from 'tape'
 import fixtures from './fixtures'
-import { loadSchemas, normalize, init } from '../src'
+import { loadSchemas, normalize, denormalize, reset } from '../src'
 
 test('Normalizing a flat schema', t => {
   t.test('Valid data', t => {
-    init()
+    reset()
     loadSchemas([fixtures.Person])
-    const data = normalize(
-      'Person',
-      { id: 515, firstName: 'John', lastName: 'Doe' },
-    )
+    const data = normalize('Person', {
+      id: 515,
+      firstName: 'John',
+      lastName: 'Doe'
+    })
 
     t.deepEqual(
       data,
@@ -32,12 +33,15 @@ test('Normalizing a flat schema', t => {
   })
 
   t.test('Additional props', t => {
-    init()
+    reset()
     loadSchemas([fixtures.Person])
-    const data = normalize(
-      'Person',
-      { id: 515, firstName: 'John', lastName: 'Doe', height: 185, weight: 90 },
-    )
+    const data = normalize('Person', {
+      id: 515,
+      firstName: 'John',
+      lastName: 'Doe',
+      height: 185,
+      weight: 90
+    })
 
     t.deepEqual(
       data,
@@ -60,7 +64,7 @@ test('Normalizing a flat schema', t => {
   })
 
   t.test('Invalid data', t => {
-    init()
+    reset()
     loadSchemas([fixtures.Person])
     t.throws(
       () => normalize({ id: '515', firstName: null }, 'Person'),
@@ -98,7 +102,7 @@ test('Normalizing a nested schema', t => {
   }
 
   t.test('Valid data', t => {
-    init()
+    reset()
     loadSchemas([fixtures.Person, fixtures.Post, fixtures.Comment])
     const data = normalize('Post', validPost)
 
@@ -149,7 +153,7 @@ test('Normalizing a nested schema', t => {
   t.test('Unknown reference', t => {
     t.throws(
       () => {
-        init()
+        reset()
         loadSchemas([fixtures.Post])
       },
       Error,
@@ -159,10 +163,15 @@ test('Normalizing a nested schema', t => {
     t.end()
   })
 
-  t.test('Schema containing \'allOf\'', t => {
+  t.test("Schema containing 'allOf'", t => {
     const post = { ...validPost, tags: ['lorem', 'ipsum'] }
-    init()
-    loadSchemas([fixtures.Person, fixtures.Post, fixtures.PostWithTags, fixtures.Comment])
+    reset()
+    loadSchemas([
+      fixtures.Person,
+      fixtures.Post,
+      fixtures.PostWithTags,
+      fixtures.Comment
+    ])
     const data = normalize('Post', post)
 
     t.deepEqual(
@@ -205,6 +214,118 @@ test('Normalizing a nested schema', t => {
       },
       'Normalized valid deep nested data successfully'
     )
+
+    t.end()
+  })
+})
+
+test('Denormalizing data', t => {
+  t.test('Denormalizing single entity', t => {
+    reset()
+    loadSchemas([fixtures.Person, fixtures.Post, fixtures.Comment])
+
+    const entities = {
+      Person: {
+        515: {
+          id: 515,
+          firstName: 'John',
+          lastName: 'Doe'
+        },
+        211: {
+          id: 211,
+          firstName: 'John',
+          lastName: 'Snow'
+        },
+        313: {
+          id: 313,
+          firstName: 'Jane',
+          lastName: 'Doe'
+        }
+      },
+      Post: {
+        42: {
+          id: 42,
+          title: 'Lorem Ipsum',
+          content: 'Lorem ipsum dolor sit amet.',
+          author: 515,
+          comments: [1, 2, 3]
+        }
+      },
+      Comment: {
+        1: { id: 1, content: 'This is really good', author: 313 },
+        2: { id: 2, content: 'So helpful, much wow', author: 211 },
+        3: { id: 3, content: 'Thanks for the kind words', author: 515 }
+      }
+    }
+
+    const normalizedData = 42
+
+    const denormalized = denormalize('Post', normalizedData, entities)
+
+    t.deepEqual(denormalized, {
+      Post: {
+        id: 42,
+        title: 'Lorem Ipsum',
+        content: 'Lorem ipsum dolor sit amet.',
+        author: { id: 515, firstName: 'John', lastName: 'Doe' },
+        comments: [
+          {
+            id: 1,
+            content: 'This is really good',
+            author: { id: 313, firstName: 'Jane', lastName: 'Doe' }
+          },
+          {
+            id: 2,
+            content: 'So helpful, much wow',
+            author: { id: 211, firstName: 'John', lastName: 'Snow' }
+          },
+          {
+            id: 3,
+            content: 'Thanks for the kind words',
+            author: { id: 515, firstName: 'John', lastName: 'Doe' }
+          }
+        ]
+      }
+    })
+
+    t.end()
+  })
+
+  t.test('Denormalizing collection', t => {
+    reset()
+    loadSchemas([fixtures.Person])
+
+    const entities = {
+      Person: {
+        515: {
+          id: 515,
+          firstName: 'John',
+          lastName: 'Doe'
+        },
+        211: {
+          id: 211,
+          firstName: 'John',
+          lastName: 'Snow'
+        },
+        313: {
+          id: 313,
+          firstName: 'Jane',
+          lastName: 'Doe'
+        }
+      }
+    }
+
+    const normalizedData = [211, 313, 515]
+
+    const denormalized = denormalize('Person', normalizedData, entities)
+
+    t.deepEqual(denormalized, {
+      Person: [
+        { id: 211, firstName: 'John', lastName: 'Snow' },
+        { id: 313, firstName: 'Jane', lastName: 'Doe' },
+        { id: 515, firstName: 'John', lastName: 'Doe' }
+      ]
+    })
 
     t.end()
   })

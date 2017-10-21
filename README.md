@@ -189,7 +189,7 @@ Validates your data against JSON Schema using AJV and normalizes it using Normal
 
 Returned value is exactly the same as return value in Normalizr.
 
-### `init(): void`
+### `reset(): void`
 
 A function that removes AJV schemas and parsen Normalizr schemas.
 
