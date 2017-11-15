@@ -1,6 +1,9 @@
 import { normalize as libNormalize } from 'normalizr'
 import debug from './debug'
 
+const normalizeSchemaName = name =>
+  name.indexOf('#/definitions/') === -1 ? `#/definitions/${name}` : name
+
 const normalize = (schemaName, data, store) => {
   const schema = store.schemas[schemaName]
   const isArray = Array.isArray(data)
@@ -16,13 +19,14 @@ const normalize = (schemaName, data, store) => {
 
   if (isArray) {
     data.forEach(item => {
-      const isValid = store.ajv.validate(schemaName, item)
+      const isValid = store.ajv.validate(normalizeSchemaName(schemaName), item)
       if (!isValid) {
         throw new Error(store.ajv.errorsText())
       }
     })
   } else {
-    const isValid = store.ajv.validate(schemaName, data)
+    const isValid = store.ajv.validate(normalizeSchemaName(schemaName), data)
+    // debug('GET SCHEMA:', store.ajv._schemas)
     if (!isValid) {
       throw new Error(store.ajv.errorsText())
     }

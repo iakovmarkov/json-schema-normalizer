@@ -38,12 +38,12 @@ export const Post = {
       type: 'string'
     },
     author: {
-      $ref: 'Person'
+      $ref: '#/definitions/Person'
     },
     comments: {
       type: 'array',
       items: {
-        $ref: 'Comment'
+        $ref: '#/definitions/Comment'
       }
     }
   }
@@ -53,7 +53,7 @@ export const PostWithTags = {
   title: 'PostWithTags',
   allOf: [
     {
-      $ref: 'Post'
+      $ref: '#/definitions/Post'
     },
     {
       tags: {
@@ -79,7 +79,7 @@ export const Comment = {
       type: 'string'
     },
     author: {
-      $ref: 'Person'
+      $ref: '#/definitions/Person'
     }
   }
 }

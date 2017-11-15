@@ -15,10 +15,11 @@ const defaultAjvConfig = {
 
 let store
 
-const reset = () => {
+const reset = (config = defaultAjvConfig) => {
   store = {
-    ajv: new Ajv(defaultAjvConfig),
-    schemas: {}
+    ajv: new Ajv(config),
+    schemas: {},
+    jsonSchemas: {}
   }
 }
 

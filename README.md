@@ -87,12 +87,12 @@ Now, our API also gives us JSON Schemas for all those entity types:
       "type": "string"
     },
     "author": {
-      "$ref": "Person"
+      "$ref": "#/definitions/Person"
     },
     "comments": {
       "type": "array",
       "items": {
-        "$ref": "Comment"
+        "$ref": "#/definitions/Comment"
       }
     }
   }
@@ -116,7 +116,7 @@ Now, our API also gives us JSON Schemas for all those entity types:
       "type": "string"
     },
     "author": {
-      "$ref": "Person"
+      "$ref": "#/definitions/Person"
     }
   }
 }

@@ -212,7 +212,7 @@ test('Normalizing a nested schema', t => {
         },
         result: 42
       },
-      'Normalized valid deep nested data successfully'
+      'Normalized valid deep nested data with `allOf` successfully'
     )
 
     t.end()

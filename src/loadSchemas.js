@@ -1,11 +1,14 @@
 import debug from './debug'
 import { schema as Schema } from 'normalizr'
 
+const normalizeSchemaName = name =>
+  name.indexOf('#/definitions/') === -1 ? `#/definitions/${name}` : name
+
 const loadSchemas = (jsonSchemas, store) => {
   jsonSchemas.forEach(schema => {
     const { title } = schema
     debug(`Adding ${title} to AJV & Schemas`)
-    store.ajv.addSchema(schema, title)
+    store.ajv.addSchema(schema, normalizeSchemaName(title))
     store.schemas[title] = parseJsonSchema(schema, jsonSchemas, store)
   })
 }
@@ -50,6 +53,7 @@ const parseJsonSchema = (schema, jsonSchemas, store) => {
 }
 
 const resolveSchema = (schemaName, jsonSchemas, store) => {
+  schemaName = schemaName.replace('#/definitions/', '')
   if (store.schemas[schemaName]) {
     return store.schemas[schemaName]
   } else {
